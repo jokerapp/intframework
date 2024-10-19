@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Bu script, Termux'ta 'intconsole' komutu için bir alias oluşturur ve .bashrc dosyasına ekler.
+# Bu script, Termux'ta 'intconsole' komutu için bir alias oluşturur ve ~/.bashrc dosyasına ekler.
 
 chmod +x terbuild.sh
 
@@ -10,31 +10,54 @@ if [ ! -f "$HOME/intframework/.install_done" ]; then
     touch "$HOME/intframework/.install_done"
 fi
 
+# Gerekli Python paketlerini yükleyin
+pip3 install -r requirements.txt
+
 cd ~
 
+# intconsole dosyasına çalıştırma izni ver ve PATH'e ekle
+chmod +x ~/intframework/intconsole
+
+# intframework dizinini $PREFIX/opt/ dizinine taşı
+chmod +x ~/intframework/intconsole
+mv ~/intframework/intconsole $PREFIX/bin/
+mv ~/intframework $PREFIX/opt/
+
+# Zsh kurulumu, isteğe bağlı olarak
 pkg install zsh
 
-# 'intconsole' komutunu tanımlayın.
-echo "alias intconsole='cd ~/intframework && python3 intconsoleV4.py && source ~/.bashrc'" >> ~/.bashrc
-echo "alias intweb='python3 /data/data/com.termux/files/home/intframework/intweb'" >> ~/.bashrc
-echo "alias introjan='python3 /data/data/com.termux/files/home/intframework/introjan'" >> ~/.bashrc
-echo "alias intvenom='python3 /data/data/com.termux/files/home/intframework/intvenom.py'" >> ~/.bashrc
-echo "alias intofficial='python3 /data/data/com.termux/files/home/intframework/intcam.py'" >> ~/.bashrc
-echo "alias intninja='python3 /data/data/com.termux/files/home/intframework/modules/intninja.py'" >> ~/.bashrc
-echo "alias intmail='python3 /data/data/com.termux/files/home/intframework/modules/intmail.py'" >> ~/.bashrc
-echo "alias intmeterpreter='python3 /data/data/com.termux/files/home/intframework/modules/intmeterpreter.py'" >> ~/.bashrc
-echo "alias intai='python3 /data/data/com.termux/files/home/intframework/İntAİV2.py'" >> ~/.bashrc
+# .bashrc dosyasına alias ekleyin
+SHELLRC="$HOME/.bashrc"
 
-# .bashrc dosyasını yeniden yükleyin.
-source ~/.bashrc
+echo "alias ll='ls -la'" >> $SHELLRC
+echo "alias intupdate='apt update && apt upgrade -y && rm -rf ~/intframework && git clone https://github.com/Intikam21kurucu/intframework'" >> $SHELLRC
+echo "export INTFRAMEWORK_PATH=$PREFIX/opt/intframework" >> $SHELLRC
+echo "export INTDIR=$PREFIX/opt/" >> $SHELLRC
+echo "alias intframework=\$INTFRAMEWORK_PATH" >> $SHELLRC
+echo "alias c='clear'" >> $SHELLRC
+echo "alias gs='git status'" >> $SHELLRC
 
-introjan -h
-intmail -h
+# intconsole fonksiyonunu ekleyin
+echo 'intconsole() { ORIGINAL_DIR=$(pwd); cd $INTFRAMEWORK_PATH; python3 intconsoleV4.py; cd $ORIGINAL_DIR; source ~/.bashrc; }; alias intconsole="intconsole"' >> $SHELLRC
 
+# Diğer alias'ları ekleyin
+echo "alias introjan='python3 \$INTFRAMEWORK_PATH/introjan.py'" >> $SHELLRC
+echo "alias intvenom='python3 \$INTFRAMEWORK_PATH/intvenom.py'" >> $SHELLRC
+echo "alias intofficial='python3 \$INTFRAMEWORK_PATH/intcam.py'" >> $SHELLRC
+echo "alias intninja='python3 \$INTFRAMEWORK_PATH/intninja.py'" >> $SHELLRC
+echo "alias intmail='python3 \$INTFRAMEWORK_PATH/intmail.py'" >> $SHELLRC
+echo "alias intmeterpreter='python3 \$INTFRAMEWORK_PATH/intmeterpreter.py'" >> $SHELLRC
+
+# ~/.bashrc dosyasını yeniden yükleyin.
+source $SHELLRC
+
+# Ekstra kurulumlar
 chmod +x oip
 mkdir -p ~/intmodules
-mv /data/data/com.termux/files/home/intframework/oip ~/intmodules/
-echo 'export PATH=$HOME/intmodules:$PATH' >> ~/.profile
+mv oip ~/intmodules/
+mv ~/intmodules/ $PREFIX/opt/
+echo 'export PATH=$PREFIX/opt/intmodules:$PATH' >> ~/.profile
 source ~/.profile
 oip -h
-cd intframework
+
+cd $PREFIX/opt/intframework
